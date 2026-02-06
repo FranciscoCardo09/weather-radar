@@ -1,7 +1,7 @@
 package main
 
 type Cities struct {
-	ID        int     `json:"id"`
+	ID        string  `json:"id"`
 	Name      string  `json:"name"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
@@ -21,7 +21,7 @@ type OpenMeteoResponse struct {
 }
 
 type WeatherData struct {
-	CityID      int     `json:"city_id"`
+	CityID      string  `json:"city_id"`
 	CityName    string  `json:"city_name"`
 	Temperature float64 `json:"temperature"`
 	Humidity    float64 `json:"humidity"`
