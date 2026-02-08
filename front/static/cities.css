@@ -1,0 +1,112 @@
+.cities-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+    gap: 1rem;
+    padding: 1.5rem 0;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.city-card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-decoration: none;
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    border-radius: 0.75rem;
+    padding: 1rem;
+    color: #1f2937;
+    box-shadow: 0 6px 14px rgba(0,0,0,0.08);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    position: relative;
+    overflow: hidden;
+    min-height: 120px;
+}
+
+.city-card::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: #f9fafb;
+    opacity: 0.4;
+    z-index: 0;
+}
+
+.city-card > * {
+    position: relative;
+    z-index: 1;
+}
+
+.city-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.12);
+}
+
+.city-card h3 {
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin: 0 0 0.5rem 0;
+}
+
+.city-card p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+}
+
+.compare-btn {
+    display: inline-block;
+    margin: 1.5rem auto;
+    padding: 0.7rem 1.5rem;
+    background: #4f46e5;
+    color: #ffffff;
+    text-decoration: none;
+    border-radius: 0.6rem;
+    font-weight: 600;
+    box-shadow: 0 6px 14px rgba(79, 70, 229, 0.25);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    text-align: center;
+}
+
+.compare-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 18px rgba(79, 70, 229, 0.35);
+}
+
+main {
+    min-height: 100vh;
+    padding: 2rem 1rem;
+    background: #f7f7f8;
+}
+
+h1 {
+    text-align: center;
+    color: #111827;
+}
+
+.state {
+    text-align: center;
+    color: #6b7280;
+    padding: 1rem 0;
+}
+
+.state.error {
+    color: #b91c1c;
+}
+
+.state.hint {
+    font-size: 0.9rem;
+}
+
+@media (max-width: 768px) {
+    .cities-grid {
+        grid-template-columns: 1fr;
+        gap: 0.9rem;
+        padding: 1rem 0.5rem;
+    }
+    
+    .city-card {
+        padding: 1rem;
+    }
+}
