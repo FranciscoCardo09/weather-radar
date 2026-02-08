@@ -32,7 +32,7 @@ func WeatherCodeToCondition(code int) string {
 }
 
 func FetchWeatherForCity(city Cities) (*WeatherData, error) {
-	url := fmt.Sprintf("https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&current_weather=true",
+	url := fmt.Sprintf("https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code",
 		city.Latitude, city.Longitude)
 
 	resp, err := http.Get(url)
@@ -46,7 +46,9 @@ func FetchWeatherForCity(city Cities) (*WeatherData, error) {
 	}
 
 	var apiResponse OpenMeteoResponse
-	json.NewDecoder(resp.Body).Decode(&apiResponse)
+	if err := json.NewDecoder(resp.Body).Decode(&apiResponse); err != nil {
+		return nil, err
+	}
 
 	return &WeatherData{
 		CityID:      city.ID,

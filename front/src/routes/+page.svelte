@@ -2,11 +2,12 @@
     import { onMount } from 'svelte';
     import { getCities } from '$lib/api';
     import type { Cities } from '$lib/types';
-    
-    let error: string | null = null;
+
+    let error = '';
     let cities: Cities[] = [];
     let loading = true;
-    
+    let selectedIds: string[] = [];
+
     onMount(async () => {
         try {
             cities = await getCities();
@@ -17,6 +18,15 @@
             loading = false;
         }
     });
+
+    function handleCompare() {
+        if (selectedIds.length !== 2) {
+            error = 'Selecciona exactamente dos ciudades para comparar.';
+            return;
+        }
+        const url = `/compare?cityA=${selectedIds[0]}&cityB=${selectedIds[1]}`;
+        window.location.href = url;
+    }
 </script>
 <svelte:head>
     <link rel="stylesheet" href="/cities.css">
@@ -34,15 +44,23 @@
     {:else}
         <div class="cities-grid">
             {#each cities as city}
-                <a href="/weather/{city.id}" class="city-card" role="button">
-                    <h3>{city.name}</h3>
-                    <p>📍 {city.latitude.toFixed(2)}°, {city.longitude.toFixed(2)}°</p>
-                </a>
+                <div class="city-item">
+                    <a href="/weather/{city.id}" class="city-card" role="button">
+                        <h3>{city.name}</h3>
+                        <p>📍 {city.latitude.toFixed(2)}°, {city.longitude.toFixed(2)}°</p>
+                    </a>
+                    <label class="select-row">
+                        <input type="checkbox" bind:group={selectedIds} value={city.id} />
+                        <span>Comparar</span>
+                    </label>
+                </div>
             {/each}
         </div>
         
         {#if cities.length > 1}
-            <a href="/compare" class="compare-btn">Comparar ciudades</a>
+            <button class="compare-btn" on:click={handleCompare} disabled={selectedIds.length !== 2}>
+                Comparar ciudades
+            </button>
         {/if}
     {/if}
 </main>

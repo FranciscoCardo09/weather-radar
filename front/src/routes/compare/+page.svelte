@@ -1,5 +1,6 @@
 <script lang="ts">
     import { onMount } from 'svelte';
+    import { page } from '$app/stores';
     import { compareWeather, getCities } from '$lib/api';
     import type { Cities } from '$lib/types';
 
@@ -13,6 +14,13 @@
     onMount(async () => {
         try {
             cities = await getCities();
+            const cityAParam = $page.url.searchParams.get('cityA');
+            const cityBParam = $page.url.searchParams.get('cityB');
+            if (cityAParam) cityA = cityAParam;
+            if (cityBParam) cityB = cityBParam;
+            if (cityAParam && cityBParam) {
+                handleCompare();
+            }
         } catch (e) {
             error = e instanceof Error ? e.message : 'Error desconocido';
         } finally {

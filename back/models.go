@@ -28,3 +28,19 @@ type WeatherData struct {
 	WindSpeed   float64 `json:"wind_speed"`
 	Condition   string  `json:"condition"`
 }
+
+type WeatherResult struct {
+	Datos *WeatherData `json:"datos"`
+	Error error        `json:"error"`
+}
+
+type WeatherSummary struct {
+	AverageTemperature float64             `json:"average_temperature"`
+	AverageHumidity    float64             `json:"average_humidity"`
+	AverageWindSpeed   float64             `json:"average_wind_speed"`
+	HotterCity         string              `json:"hotter_city"`
+	ColderCity         string              `json:"colder_city"`
+	WindyCity          string              `json:"windy_city"`
+	Ranking            []string            `json:"ranking"`
+	ByCondition        map[string][]string `json:"by_condition"`
+}
