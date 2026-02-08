@@ -26,14 +26,14 @@ func main() {
 	// CORS para el frontend
 	router.Use(cors.New(cors.Config{
 		AllowOrigins:     []string{"http://localhost:5173"},
-		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowMethods:     []string{"GET", "POST"},
 		AllowHeaders:     []string{"Origin", "Content-Type"},
 		AllowCredentials: true,
 	}))
 
 	router.GET("/api/cities", GetCitiesHandler)
 	router.GET("/api/weather/:city_id", GetWeatherHandler)
-	router.GET("/api/compare/:city_id1/:city_id2", CompareWeatherHandler)
+	router.POST("/api/compare", CompareWeatherHandler)
 
 	router.Run(":8080")
 }
