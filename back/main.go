@@ -1,6 +1,7 @@
 package main
 
 import (
+	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
@@ -21,6 +22,14 @@ func main() {
 
 	//Endpoint de prueba
 	router := gin.Default()
+
+	//Rutas para el frontend
+	router.Use(cors.New(cors.Config{
+		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowMethods:     []string{"GET", "POST", "PUT", "DELETE"},
+		AllowHeaders:     []string{"Origin", "Content-Type"},
+		AllowCredentials: true,
+	}))
 
 	router.GET("/api/cities", GetCitiesHandler)
 	router.GET("/api/weather/:city_id", GetWeatherHandler)
