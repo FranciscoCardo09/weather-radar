@@ -1,6 +1,8 @@
 package main
 
 import (
+	"fmt"
+
 	"github.com/gin-gonic/gin"
 )
 
@@ -24,25 +26,29 @@ func GetWeatherHandler(c *gin.Context) {
 }
 
 func CompareWeatherHandler(c *gin.Context) {
-	cityID1 := c.Param("city_id1") // Obtiene el ID de la primera ciudad desde la URL
-	cityID2 := c.Param("city_id2") // Obtiene el ID de la segunda ciudad desde la URL
-
-	city1 := GetCityByID(cityID1) // Busca la primera ciudad por su ID
-	city2 := GetCityByID(cityID2) // Busca la segunda ciudad por su ID
-
-	if city1 == nil || city2 == nil {
-		c.JSON(400, gin.H{"error": "Ciudad no encontrada"})
+	var req CompareRequest
+	if err := c.ShouldBindJSON(&req); err != nil {
+		c.JSON(400, gin.H{"error": "JSON inválido"})
 		return
 	}
 
-	weather1, err1 := FetchWeatherForCity(*city1) // ← ctx PRIMERO
-	weather2, err2 := FetchWeatherForCity(*city2)
-
-	if err1 != nil || err2 != nil {
-		c.JSON(500, gin.H{"error": "Error al obtener el clima de una o ambas ciudades"})
-		return
+	var cities []Cities
+	for _, id := range req.CityIDs {
+		city := GetCityByID(id)
+		if city == nil {
+			c.JSON(400, gin.H{"error": fmt.Sprintf("Ciudad con ID %s no encontrada", id)})
+			return
+		}
+		cities = append(cities, *city)
 	}
 
-	comparison := CompareWeather(*weather1, *weather2) // Compara los datos del clima de ambas ciudades
-	c.JSON(200, gin.H{"comparison": comparison})       // Devuelve JSON con el resultado de la comparación
+	weatherData := FetchWeatherForCities(c.Request.Context(), cities)
+	summary := ComputeSummary(weatherData)
+
+	response := CompareResult{
+		Cities:  weatherData,
+		Summary: summary,
+		Error:   nil,
+	}
+	c.JSON(200, response)
 }
