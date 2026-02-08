@@ -44,3 +44,18 @@ type WeatherSummary struct {
 	Ranking            []string            `json:"ranking"`
 	ByCondition        map[string][]string `json:"by_condition"`
 }
+
+type RankingEntry struct {
+	CityName    string  `json:"city_name"`
+	Temperature float64 `json:"temperature"`
+}
+
+type CompareResult struct {
+	Cities  []WeatherData  `json:"cities"`
+	Summary WeatherSummary `json:"summary"`
+	Error   error          `json:"error"`
+}
+
+type CompareRequest struct {
+	CityIDs []string `json:"city_ids"`
+}
