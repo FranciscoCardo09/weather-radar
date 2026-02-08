@@ -20,11 +20,11 @@
     });
 
     function handleCompare() {
-        if (selectedIds.length !== 2) {
-            error = 'Selecciona exactamente dos ciudades para comparar.';
+        if (selectedIds.length < 2) {
+            error = 'Selecciona al menos dos ciudades para comparar.';
             return;
         }
-        const url = `/compare?cityA=${selectedIds[0]}&cityB=${selectedIds[1]}`;
+        const url = `/compare?cityIds=${selectedIds.join(',')}`;
         window.location.href = url;
     }
 </script>
@@ -58,7 +58,7 @@
         </div>
         
         {#if cities.length > 1}
-            <button class="compare-btn" on:click={handleCompare} disabled={selectedIds.length !== 2}>
+            <button class="compare-btn" on:click={handleCompare} disabled={selectedIds.length < 2}>
                 Comparar ciudades
             </button>
         {/if}
