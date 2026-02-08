@@ -1,3 +1,5 @@
+import type { CompareResult } from './types';
+
 const API_URL = 'http://localhost:8080/api';
 
 export async function getCities() {
@@ -8,9 +10,18 @@ export async function getCities() {
     return await response.json();
 }
 
-export async function compareWeather(cityId1: string, cityId2: string) {
-  const response = await fetch(`http://localhost:8080/api/compare/${cityId1}/${cityId2}`);
-  return response.json();
+export async function compareWeather(cityIds: string[]): Promise<CompareResult> {
+    const response = await fetch(`${API_URL}/compare`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ city_ids: cityIds })
+    });
+    
+    if (!response.ok) {
+        throw new Error('Error al comparar ciudades');
+    }
+    
+    return await response.json();
 }
 
 export async function getWeatherForCity(cityId: string) {
