@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 
 	"github.com/gin-gonic/gin"
 )
@@ -16,8 +16,17 @@ func GetWeatherHandler(c *gin.Context) {
 	cityID := c.Param("city_id") // Obtiene el ID de la ciudad desde la URL
 	city := GetCityByID(cityID)  // Busca la ciudad por su ID
 
-	weather, err := FetchWeatherForCity(*city) // Obtiene el clima para la ciudad
+	// FIX: Validar que la ciudad existe antes de usarla
+	// Previene panic por dereferenciar un puntero nil
+	if city == nil {
+		c.JSON(404, gin.H{"error": "Ciudad no encontrada"})
+		return
+	}
+
+	// FIX: Pasar context de la request para respetar timeout y cancelación
+	weather, err := FetchWeatherForCity(c.Request.Context(), *city)
 	if err != nil {
+		log.Printf("[ERROR] Error fetching weather for city %s: %v", cityID, err)
 		c.JSON(500, gin.H{"error": "Error al obtener el clima"})
 		return
 	}
@@ -32,17 +41,36 @@ func CompareWeatherHandler(c *gin.Context) {
 		return
 	}
 
+	// FIX: Validar que se proporcionaron al menos una ciudad
+	if len(req.CityIDs) == 0 {
+		c.JSON(400, gin.H{"error": "Debes proporcionar al menos una ciudad"})
+		return
+	}
+
+	// FIX: Limitar el número máximo de ciudades para evitar abuso
+	if len(req.CityIDs) > 50 {
+		c.JSON(400, gin.H{"error": "Máximo 50 ciudades por comparación"})
+		return
+	}
+
 	var cities []Cities
 	for _, id := range req.CityIDs {
 		city := GetCityByID(id)
 		if city == nil {
-			c.JSON(400, gin.H{"error": fmt.Sprintf("Ciudad con ID %s no encontrada", id)})
+			c.JSON(400, gin.H{"error": "Ciudad con ID " + id + " no encontrada"})
 			return
 		}
 		cities = append(cities, *city)
 	}
 
 	weatherData := FetchWeatherForCities(c.Request.Context(), cities)
+
+	// FIX: Validar que se obtuvieron datos antes de computar el resumen
+	if weatherData == nil || len(weatherData) == 0 {
+		c.JSON(500, gin.H{"error": "No se pudieron obtener datos del clima"})
+		return
+	}
+
 	summary := ComputeSummary(weatherData)
 
 	response := CompareResult{
