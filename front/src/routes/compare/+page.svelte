@@ -48,35 +48,33 @@
         }
     }
 
+    // FIX: Usar directamente el ranking del backend en lugar de recalcularlo
     function rankingText() {
-        const list = [...weatherCards].sort((a, b) => b.temperature - a.temperature);
-        return list.map((c, index) => `${index + 1}. ${c.city_name} (${c.temperature.toFixed(1)}°C)`).join(' - ');
+        if (!summary || !summary.ranking || summary.ranking.length === 0) return '';
+        return summary.ranking.map((city, index) => {
+            const weather = weatherCards.find(w => w.city_name === city);
+            const temp = weather ? weather.temperature.toFixed(1) : 'N/A';
+            return `${index + 1}. ${city} (${temp}°C)`;
+        }).join(' - ');
     }
 
+    // FIX: Usar promedios del backend en lugar de recalcularlos
     function averageText() {
-        if (!weatherCards.length) return '';
-        const avgTemp = weatherCards.reduce((a, b) => a + b.temperature, 0) / weatherCards.length;
-        const avgHum = weatherCards.reduce((a, b) => a + b.humidity, 0) / weatherCards.length;
-        const avgWind = weatherCards.reduce((a, b) => a + b.wind_speed, 0) / weatherCards.length;
-        return `Temp promedio: ${avgTemp.toFixed(1)}°C, Humedad: ${avgHum.toFixed(0)}%, Viento: ${avgWind.toFixed(0)} km/h`;
+        if (!summary) return '';
+        return `Temp promedio: ${summary.average_temperature.toFixed(1)}°C, Humedad: ${summary.average_humidity.toFixed(0)}%, Viento: ${summary.average_wind_speed.toFixed(0)} km/h`;
     }
 
+    // FIX: Usar extremos del backend en lugar de recalcularlos
     function extremesText() {
-        if (!weatherCards.length) return '';
-        const hotter = weatherCards.reduce((a, b) => (a.temperature > b.temperature ? a : b));
-        const colder = weatherCards.reduce((a, b) => (a.temperature < b.temperature ? a : b));
-        const windy = weatherCards.reduce((a, b) => (a.wind_speed > b.wind_speed ? a : b));
-        return `Más caliente: ${hotter.city_name}, Más fría: ${colder.city_name}, Más ventosa: ${windy.city_name}`;
+        if (!summary) return '';
+        return `Más caliente: ${summary.hotter_city}, Más fría: ${summary.colder_city}, Más ventosa: ${summary.windy_city}`;
     }
 
+    // FIX: Usar agrupación por condición del backend
     function byConditionText() {
-        if (!weatherCards.length) return '';
-        const counts: Record<string, number> = {};
-        for (const c of weatherCards) {
-            counts[c.condition] = (counts[c.condition] || 0) + 1;
-        }
-        return Object.entries(counts)
-            .map(([k, v]) => `${k}: ${v} ciudad${v === 1 ? '' : 'es'}`)
+        if (!summary || !summary.by_condition) return '';
+        return Object.entries(summary.by_condition)
+            .map(([k, v]) => `${k}: ${v.length} ciudad${v.length === 1 ? '' : 'es'}`)
             .join(', ');
     }
 </script>
