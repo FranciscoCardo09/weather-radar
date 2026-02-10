@@ -1,18 +1,12 @@
 package main
 
-func CompareWeather(w1, w2 WeatherData) bool {
-	temperature := w1.Temperature - w2.Temperature
-	humidity := w1.Humidity - w2.Humidity
-	windspeed := w1.WindSpeed - w2.WindSpeed
-	condition := w1.Condition == w2.Condition
-
-	return temperature == 0 && humidity == 0 && windspeed == 0 && condition
-}
+import "sort"
 
 func ComputeSummary(weatherData []WeatherData) WeatherSummary {
 	var summary WeatherSummary
 	summary.ByCondition = make(map[string][]string)
 
+	// FIX: Early return si no hay datos, evita división por cero y panic
 	if len(weatherData) == 0 {
 		return summary
 	}
@@ -30,8 +24,14 @@ func ComputeSummary(weatherData []WeatherData) WeatherSummary {
 	summary.AverageHumidity = totalHumidity / float64(len(weatherData))
 	summary.AverageWindSpeed = totalWind / float64(len(weatherData))
 
-	var hotterCity, colderCity, windyCity string
-	maxTemp, minTemp, maxWind := weatherData[0].Temperature, weatherData[0].Temperature, weatherData[0].WindSpeed
+	// FIX: Inicializar variables de extremos correctamente antes del loop
+	// Evita panic si el slice está vacío o tiene valores incorrectos
+	maxTemp := weatherData[0].Temperature
+	minTemp := weatherData[0].Temperature
+	maxWind := weatherData[0].WindSpeed
+	hotterCity := weatherData[0].CityName
+	colderCity := weatherData[0].CityName
+	windyCity := weatherData[0].CityName
 
 	for _, data := range weatherData {
 		if data.Temperature > maxTemp {
@@ -51,6 +51,21 @@ func ComputeSummary(weatherData []WeatherData) WeatherSummary {
 	summary.HotterCity = hotterCity
 	summary.ColderCity = colderCity
 	summary.WindyCity = windyCity
+
+	// FIX: Implementar ranking en el backend (antes se calculaba solo en el frontend)
+	// Ordenar ciudades por temperatura descendente
+	sorted := make([]WeatherData, len(weatherData))
+	copy(sorted, weatherData)
+
+	sort.Slice(sorted, func(i, j int) bool {
+		return sorted[i].Temperature > sorted[j].Temperature
+	})
+
+	ranking := make([]string, len(sorted))
+	for i, data := range sorted {
+		ranking[i] = data.CityName
+	}
+	summary.Ranking = ranking
 
 	return summary
 }
