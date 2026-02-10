@@ -31,7 +31,9 @@ type WeatherData struct {
 
 type WeatherResult struct {
 	Datos *WeatherData `json:"datos"`
-	Error error        `json:"error"`
+	// FIX: Cambiado de 'error' a '*string' para correcta serialización JSON
+	// El tipo 'error' no se serializa correctamente y siempre retorna null
+	Error *string `json:"error,omitempty"`
 }
 
 type WeatherSummary struct {
@@ -53,7 +55,8 @@ type RankingEntry struct {
 type CompareResult struct {
 	Cities  []WeatherData  `json:"cities"`
 	Summary WeatherSummary `json:"summary"`
-	Error   error          `json:"error"`
+	// FIX: Cambiado de 'error' a '*string' para correcta serialización JSON
+	Error *string `json:"error,omitempty"`
 }
 
 type CompareRequest struct {
