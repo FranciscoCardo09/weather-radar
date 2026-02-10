@@ -1,7 +1,7 @@
 package main
 
 type Cities struct {
-	ID        int     `json:"id"`
+	ID        string  `json:"id"`
 	Name      string  `json:"name"`
 	Latitude  float64 `json:"latitude"`
 	Longitude float64 `json:"longitude"`
@@ -21,10 +21,41 @@ type OpenMeteoResponse struct {
 }
 
 type WeatherData struct {
-	CityID      int     `json:"city_id"`
+	CityID      string  `json:"city_id"`
 	CityName    string  `json:"city_name"`
 	Temperature float64 `json:"temperature"`
 	Humidity    float64 `json:"humidity"`
 	WindSpeed   float64 `json:"wind_speed"`
 	Condition   string  `json:"condition"`
+}
+
+type WeatherResult struct {
+	Datos *WeatherData `json:"datos"`
+	Error error        `json:"error"`
+}
+
+type WeatherSummary struct {
+	AverageTemperature float64             `json:"average_temperature"`
+	AverageHumidity    float64             `json:"average_humidity"`
+	AverageWindSpeed   float64             `json:"average_wind_speed"`
+	HotterCity         string              `json:"hotter_city"`
+	ColderCity         string              `json:"colder_city"`
+	WindyCity          string              `json:"windy_city"`
+	Ranking            []string            `json:"ranking"`
+	ByCondition        map[string][]string `json:"by_condition"`
+}
+
+type RankingEntry struct {
+	CityName    string  `json:"city_name"`
+	Temperature float64 `json:"temperature"`
+}
+
+type CompareResult struct {
+	Cities  []WeatherData  `json:"cities"`
+	Summary WeatherSummary `json:"summary"`
+	Error   error          `json:"error"`
+}
+
+type CompareRequest struct {
+	CityIDs []string `json:"city_ids"`
 }
