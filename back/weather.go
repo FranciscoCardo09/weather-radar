@@ -1,9 +1,11 @@
 package main
 
 import (
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"time"
 )
 
 func WeatherCodeToCondition(code int) string {
@@ -31,11 +33,21 @@ func WeatherCodeToCondition(code int) string {
 	}
 }
 
-func FetchWeatherForCity(city Cities) (*WeatherData, error) {
+// FIX: Añadido context.Context para permitir cancelación y timeout
+// Esto permite que las requests HTTP respeten el timeout y la cancelación del usuario
+func FetchWeatherForCity(ctx context.Context, city Cities) (*WeatherData, error) {
 	url := fmt.Sprintf("https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code",
 		city.Latitude, city.Longitude)
 
-	resp, err := http.Get(url)
+	// FIX: Crear request con context para respetar cancelación
+	req, err := http.NewRequestWithContext(ctx, "GET", url, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	// FIX: Usar cliente HTTP con timeout de 10 segundos
+	client := &http.Client{Timeout: 10 * time.Second}
+	resp, err := client.Do(req)
 	if err != nil {
 		return nil, err
 	}
