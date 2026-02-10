@@ -1,31 +1,25 @@
 package main
 
 import (
+	"log"
+	"os"
+
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
 )
 
 func main() {
+	// FIX: Eliminar código comentado - Git mantiene el historial
 
-	//Prueaba de GetCityByID
-	// r := GetCityByID("cordoba")
-	// fmt.Printf("Ciudad: %s, Latitud: %.2f°C, Longitud: %.2f%%\n", r.Name, r.Latitude, r.Longitude)
+	// FIX: Configuración mediante variables de entorno
+	port := getEnv("PORT", "8080")
+	frontendURL := getEnv("FRONTEND_URL", "http://localhost:5173")
 
-	//Prueba de FetchWeatherForCity
-	// w, err := FetchWeatherForCity(*r)
-	// if err != nil {
-	//	fmt.Println("Error:", err)
-	//	return
-	// }
-	// fmt.Printf("Ciudad: %s, Temperatura: %.2f°C, Humedad: %.2f%%, Viento: %.2f km/h, Condición: %s\n",
-	//	w.CityName, w.Temperature, w.Humidity, w.WindSpeed, w.Condition)
-
-	//Endpoint de prueba
 	router := gin.Default()
 
 	// CORS para el frontend
 	router.Use(cors.New(cors.Config{
-		AllowOrigins:     []string{"http://localhost:5173"},
+		AllowOrigins:     []string{frontendURL},
 		AllowMethods:     []string{"GET", "POST"},
 		AllowHeaders:     []string{"Origin", "Content-Type"},
 		AllowCredentials: true,
@@ -35,5 +29,14 @@ func main() {
 	router.GET("/api/weather/:city_id", GetWeatherHandler)
 	router.POST("/api/compare", CompareWeatherHandler)
 
-	router.Run(":8080")
+	log.Printf("[INFO] Starting server on port %s", port)
+	router.Run(":" + port)
+}
+
+// getEnv obtiene una variable de entorno o retorna un valor por defecto
+func getEnv(key, fallback string) string {
+	if value := os.Getenv(key); value != "" {
+		return value
+	}
+	return fallback
 }
