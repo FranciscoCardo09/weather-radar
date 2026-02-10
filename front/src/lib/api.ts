@@ -1,6 +1,8 @@
 import type { CompareResult } from './types';
 
-const API_URL = 'http://localhost:8080/api';
+// FIX: Usar variable de entorno para la URL del API
+// Permite configurar diferentes URLs para desarrollo, staging y producción
+const API_URL = import.meta.env.PUBLIC_API_URL || 'http://localhost:8080/api';
 
 export async function getCities() {
     const response = await fetch(`${API_URL}/cities`);
@@ -25,7 +27,8 @@ export async function compareWeather(cityIds: string[]): Promise<CompareResult> 
 }
 
 export async function getWeatherForCity(cityId: string) {
-    const response = await fetch(`http://localhost:8080/api/weather/${cityId}`);
+    // FIX: Usar la constante API_URL en lugar de hardcodear la URL
+    const response = await fetch(`${API_URL}/weather/${cityId}`);
     if (!response.ok) {
         throw new Error('Error al obtener el clima de la ciudad');
     }
