@@ -66,7 +66,8 @@ func CompareWeatherHandler(c *gin.Context) {
 	weatherData := FetchWeatherForCities(c.Request.Context(), cities)
 
 	// FIX: Validar que se obtuvieron datos antes de computar el resumen
-	if weatherData == nil || len(weatherData) == 0 {
+	// En Go, len() de un slice nil retorna 0, por lo que no necesitamos verificar nil explícitamente
+	if len(weatherData) == 0 {
 		c.JSON(500, gin.H{"error": "No se pudieron obtener datos del clima"})
 		return
 	}
