@@ -27,8 +27,9 @@ export async function compareWeather(cityIds: string[]): Promise<CompareResult> 
 }
 
 export async function getWeatherForCity(cityId: string) {
-    // FIX: Usar la constante API_URL en lugar de hardcodear la URL
-    const response = await fetch(`${API_URL}/weather/${cityId}`);
+    // FIX: Usar encodeURIComponent para manejar caracteres especiales en URLs
+    const url = `${API_URL}/weather/${encodeURIComponent(cityId)}`;
+    const response = await fetch(url);
     if (!response.ok) {
         throw new Error('Error al obtener el clima de la ciudad');
     }

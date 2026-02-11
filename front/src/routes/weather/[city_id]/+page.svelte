@@ -13,6 +13,7 @@
     async function loadWeather(id: string) {
         loading = true;
         error = null;
+        weather = null; // FIX: Limpiar datos anteriores para evitar confusión
         try {
             weather = await getWeatherForCity(id);
             lastCityId = id;
