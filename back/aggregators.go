@@ -2,6 +2,15 @@ package main
 
 import "sort"
 
+// ComputeSummary calcula estadísticas agregadas de los datos meteorológicos.
+//
+// Retorna:
+//   - Promedios de temperatura, humedad y velocidad del viento
+//   - Ciudades con valores extremos (más caliente, más fría, más ventosa)
+//   - Ranking de ciudades por temperatura (descendente)
+//   - Agrupación de ciudades por condición climática
+//
+// Si weatherData está vacío, retorna un WeatherSummary con valores por defecto.
 func ComputeSummary(weatherData []WeatherData) WeatherSummary {
 	var summary WeatherSummary
 	summary.ByCondition = make(map[string][]string)
