@@ -8,6 +8,23 @@ import (
 	"time"
 )
 
+// FIX: Cliente HTTP global con connection pooling para mejor performance
+// Reutilizar el cliente evita crear nuevas conexiones TCP en cada request
+var weatherClient *http.Client
+
+// InitWeatherClient inicializa el cliente HTTP global con el timeout configurado
+func InitWeatherClient(timeout time.Duration) {
+	weatherClient = &http.Client{
+		Timeout: timeout,
+		Transport: &http.Transport{
+			MaxIdleConns:        100,
+			MaxIdleConnsPerHost: 10,
+			IdleConnTimeout:     90 * time.Second,
+		},
+	}
+}
+
+// WeatherCodeToCondition convierte un código de clima de Open-Meteo a descripción en español
 func WeatherCodeToCondition(code int) string {
 	switch {
 	case code == 0:
@@ -33,8 +50,13 @@ func WeatherCodeToCondition(code int) string {
 	}
 }
 
-// FIX: Añadido context.Context para permitir cancelación y timeout
-// Esto permite que las requests HTTP respeten el timeout y la cancelación del usuario
+// FetchWeatherForCity obtiene los datos meteorológicos actuales de la API Open-Meteo
+// para la ciudad especificada. Respeta el contexto para cancelación y timeout.
+//
+// Retorna error si:
+//   - El contexto es cancelado
+//   - La API responde con status != 200
+//   - La respuesta JSON no puede ser parseada
 func FetchWeatherForCity(ctx context.Context, city Cities) (*WeatherData, error) {
 	url := fmt.Sprintf("https://api.open-meteo.com/v1/forecast?latitude=%f&longitude=%f&current=temperature_2m,relative_humidity_2m,wind_speed_10m,weather_code",
 		city.Latitude, city.Longitude)
@@ -45,9 +67,8 @@ func FetchWeatherForCity(ctx context.Context, city Cities) (*WeatherData, error)
 		return nil, err
 	}
 
-	// FIX: Usar cliente HTTP con timeout de 10 segundos
-	client := &http.Client{Timeout: 10 * time.Second}
-	resp, err := client.Do(req)
+	// FIX: Usar cliente HTTP global con connection pooling
+	resp, err := weatherClient.Do(req)
 	if err != nil {
 		return nil, err
 	}
