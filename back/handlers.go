@@ -6,12 +6,16 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// GetCitiesHandler maneja la solicitud para obtener la lista de ciudades
+// GetCitiesHandler maneja GET /api/cities
+// Retorna la lista completa de ciudades argentinas disponibles para consulta
 func GetCitiesHandler(c *gin.Context) {
 	cities := GetCities() // Obtiene las 15 ciudades argentinas
 	c.JSON(200, cities)   // Devuelve JSON: [{"id":"cordoba","name":"Córdoba"...}]
 }
 
+// GetWeatherHandler maneja GET /api/weather/:city_id
+// Retorna los datos meteorológicos actuales para una ciudad específica.
+// Responde con 404 si la ciudad no existe, 500 si hay error al obtener el clima.
 func GetWeatherHandler(c *gin.Context) {
 	cityID := c.Param("city_id") // Obtiene el ID de la ciudad desde la URL
 	city := GetCityByID(cityID)  // Busca la ciudad por su ID
@@ -34,6 +38,14 @@ func GetWeatherHandler(c *gin.Context) {
 	c.JSON(200, weather) // Devuelve JSON con los datos del clima
 }
 
+// CompareWeatherHandler maneja POST /api/compare
+// Compara el clima de múltiples ciudades y retorna estadísticas agregadas.
+// Requiere JSON body con formato: {"city_ids": ["cordoba", "buenosaires", ...]}
+//
+// Validaciones:
+//   - Mínimo 2 ciudades (después de eliminar duplicados)
+//   - Máximo 50 ciudades
+//   - Todas las ciudades deben existir
 func CompareWeatherHandler(c *gin.Context) {
 	var req CompareRequest
 	if err := c.ShouldBindJSON(&req); err != nil {
@@ -53,14 +65,27 @@ func CompareWeatherHandler(c *gin.Context) {
 		return
 	}
 
+	// FIX: Eliminar duplicados antes de procesar
+	seen := make(map[string]bool)
 	var cities []Cities
 	for _, id := range req.CityIDs {
+		if seen[id] {
+			continue // Skip duplicados
+		}
+		seen[id] = true
+
 		city := GetCityByID(id)
 		if city == nil {
 			c.JSON(400, gin.H{"error": "Ciudad con ID " + id + " no encontrada"})
 			return
 		}
 		cities = append(cities, *city)
+	}
+
+	// FIX: Validar que después de eliminar duplicados quedan al menos 2 ciudades
+	if len(cities) < 2 {
+		c.JSON(400, gin.H{"error": "Debes proporcionar al menos dos ciudades distintas"})
+		return
 	}
 
 	weatherData := FetchWeatherForCities(c.Request.Context(), cities)
